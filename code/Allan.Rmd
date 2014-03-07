@@ -1,0 +1,119 @@
+Data Mining With R
+========================================================
+
+回归树模型预测
+--------------------------------------------------------
+```{r getRT}
+library(rpart)                    #加载rpart添加包，含有回归树模型的实现
+library(DMwR)                     #加载DMwR包，里面含有数据data
+data(algae)
+algae <- algae[-manyNAs(algae),]
+rt.a1 <- rpart(a1 ~ ., data=algae[,1:12]) #rpart函数用于获取回归树(Regression Tree)模型
+rt.a1
+```
+上面数据的每一行分别代表(节点编号，节点分支条件，在这个节点上的样本数量，相对平均值的偏差，海藻a1的出现频率)
+```
+For example,
+2) PO4>=43.818 147 31279.120  8.979592
+节点编号为2；
+在root节点上PO4>=43.818的就到节点2这边；
+节点2含有147个水样；
+海藻a1在这个条件(PO4>=43.8)的相对平均值偏差为31279.120；
+海藻a1在这个条件下出现的平均频率是7.49
+
+如果我们想建立一个回归树来预测某个水样的频率，只要从根结点开始根据对该水样检验的结果，追踪某个分支，直到叶子节点。叶结点目标变量的平均值就是树的预测值,如下图所示
+```
+
+```{r plotRT}
+prettyTree(rt.a1) #得到回归树的图形表示
+```
+
+```
+上面使用rpart函数构造数，在构建树的过程中，当给定条件满足时构建过程就停止。如下列的三个条件：
+1) 偏差的减少小于某一个给定的界限值
+2) 当结点中的样本数量小于某个给定界限时
+3) 当树的深度大于一个给定的界限值
+这三个条件分别由rpart函数的三个参数来确定(cp,minsplit,maxdepth)，默认值分别是0.01，20和30
+```
+
+模型的评价
+-------------------------------------
+
+一种度量的方法就是用平均绝对误差(MAE)
+  * 第一步，获取需要评价模型预测性能的预测值。这一步用predict()函数预测   
+```{r predictRT}
+  rt.predictions.a1 <- predict(rt.a1,algae)
+```
+  * 第二步，计算其平均绝对误差
+
+```{r maeRT}
+  (mae.a1.rt <- mean(abs(rt.predictions.a1 - algae[,"a1"])))
+```
+
+但是有了这个值后，还是不知道怎么知道什么得分比较好，什么得分比较差。所以我们这里需要一个比值。   
+就是标准化后的平均绝对误差(NMSE)。   
+通常采用目标变量的平均值来作为基准模型:
+```{r nmse}
+  (nmse.a1.rt <- mean((rt.predictions.a1-algae[,'a1'])^2)/mean((mean(algae[,'a1'])-algae[,'a1'])^2))
+  # NMSE是一个比值，其取值范文通常为0~1。如果模型表现优于这个简单模型的基准预测。则
+  # NMSE会明显小于1，就是说这个值越小模型越好。大于1的话说明比平均值模型还差
+```
+
+可视化查看模型的预测值
+-----------------------------------   
+绘制误差的散点图   
+
+```{r plotError}
+plot(rt.predictions.a1,algae[,"a1"],main="Regression Tree", xlab = "Predictions", ylab="True Values")
+#abline函数化一条y=x的虚线
+abline(0,1,lty=2)
+#虚线是一条穿过零点y=x的直线，如果所有的预测都正确，所有的圈都应该在这条虚线上。   
+#表示true value = predicted value.  
+```
+
+Cross Validation 选择合适的模型
+------------------------------------------
+
+因为我们之前的预测都是在训练集上进行的，这样得到的模型有可能会过渡拟合，因此我们需要获得模型在位置数据上预测性能的更加可靠的估计。   
+首先获取k个同样大小的随机训练数据子集。对于每一个子集，用除去它之外的其余k-1个子集建立模型，用第k个子集来评估这个模型，最后存储模型性能指标。   
+```
+比较常用的k值是10
+并且有时候我们甚至可以跑这个k-fold cross validation很多次从而获取更加可靠的预测
+这里首先建立两个模型函数
+```
+
+```{r model_function}
+cv.rpart<-function(form,train,test,...){
+  m<-rpartXse(form,train,...)             # 得到回归树模型
+  p<-predict(m,test)                      # 对这个模型在测试集上进行预测
+  mse <- mean((p-resp(form,test))^2)      # 利用mse(均方误差)作为误差度量
+  c(nmse=mse/mean((mean(resp(form,train))-resp(form,test))^2))
+}
+
+cv.lm<-function(form,train,test,...){
+  m<-lm(form,train,...)                   # 线性回归模型获取
+  p<-predict(m,test)                      # 模型在测试集上预测
+  mse <- mean((p-resp(form,test))^2)      # 同样使用mse作为衡量误差的指标
+  c(nmse=mse/mean((mean(resp(form,train))-resp(form,test))^2))
+}
+```
+在R中有提供experimentalComparison的函数来让我们进行cross validation和不同模型之间的比较，如下代码所示   
+```{r experimentalCompa}
+#函数的第一个参数表示需要用到的dataset
+#第二个参数是一个向量，向量中的每个变量就是我们的模型
+  # variant的作用就是产生我们的模型变量, se的值表示产生三种不同的回归树模型
+#最后一个参数是设置要跑多少遍cross-validation,这里是3次，然后每次分10份，分的时候randomly分，种子是1234
+res <- experimentalComparison(    
+  c(dataset(a1 ~ .,algae[,1:12],'a1')),    
+  c(variants('cv.lm'), variants('cv.rpart',se=c(0,0.5,1))),    
+  cvSettings(3,10,1234))  
+```
+然后我们对结果进行一个summary,这样就可以看到nmse的值。
+```{r summaryExper}
+summary(res)
+```
+更直观的我们可以画出图作为可视化结果。
+```{r plotres}
+plot(res)
+```
+
