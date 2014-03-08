@@ -1,0 +1,14 @@
+
+http://data-scientist.github.io/tags.html
+http://data-scientist.github.io/rss.xml
+http://data-scientist.github.io/sitemap.txt
+http://data-scientist.github.io/atom.xml
+http://data-scientist.github.io/categories.html
+http://data-scientist.github.io/pages.html
+http://data-scientist.github.io/index.html
+http://data-scientist.github.io/archive.html
+
+http://data-scientist.github.io/test%E5%88%86%E7%B1%BB/2014/03/04/latex%E6%B5%8B%E8%AF%95
+http://data-scientist.github.io/r/2014/03/03/RmdTest
+http://data-scientist.github.io/r/2012/07/03/knitr-jekyll
+http://data-scientist.github.io/lessons/2011/12/29/jekyll-introduction
