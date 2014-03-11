@@ -1,9 +1,32 @@
 ---
 layout: page
-title: Hello World!
-tagline: Supporting tagline
+title: Hello,Guys of Team2!
+tagline: hello from Blan, don't hit me plz.... 
 ---
 {% include JB/setup %}
+# Caution !! #
+
+## Do not read just after a meal ##
+
+
+Sorry for coming late!
+This is a test of our page and we'll edit it in the future.
+
+It's just a copy of our organization page, for testing only.
+
+
+If anyone want to test your md files which are converted from rmd files which are generated in RStudio, just try to put your md files in folder _post in github,gh-pages branch.
+
+Cause I'm using a Ubuntu system, I think I'd better not telling you guys how to use github in your system,  google knows it.
+
+All you need to do is to put your md files in _post, don't forget to rename it in the format year-month-day-Title.md such as 2014-03-11-HelloFromBlan.md.
+
+If there's any question, please send me a mail or leave me a message, my telephone number is .... sorry, my email address is blangero1987@gmail.com.
+
+Finally, sorry for my poor English....
+
+See you~
+
 
 Read [Jekyll Quick Start](http://jekyllbootstrap.com/usage/jekyll-quick-start.html)
 
