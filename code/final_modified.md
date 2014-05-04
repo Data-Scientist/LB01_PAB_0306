@@ -110,9 +110,9 @@ clean.algae <- knnImputation(algae, k = 10)
     (1) 多元线性回归简单介绍   
     主要就是对每一个feature训练出来一个weight，然后用这些weights应用到测试集的feature中，从而得到输出。例如   
     -----------------------------Example----------------------------------------     
-    __Feature__: $f1\,\, f2\,\, f3\,\, f4$    
-    __Weights from Training__: $w1\,\, w2\,\, w3\,\, w4$   
-    __Output by predicton__: $o1\,=\,w1f1+w2f2+w3f3+w4f4$   
+    __Feature__: \(f1\,\, f2\,\, f3\,\, f4\)    
+    __Weights from Training__: \(w1\,\, w2\,\, w3\,\, w4\)   
+    __Output by predicton__: \(o1\,=\,w1f1+w2f2+w3f3+w4f4\)   
     ----------------------------------------------------------------------------      
     (2) 利用R语言内置的lm函数即可以获得linear regression model线性模型   
     `a1 ~`这个是表示用除了a1以外的所有属性数据来构造模型   
